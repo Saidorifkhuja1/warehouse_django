@@ -1,0 +1,11 @@
+{% load static %}
+{% block content %}
+<h2>Warehouses</h2>
+<ul>
+    {% for warehouse in warehouses %}
+    <li><a href="{% url 'warehouse_detail' warehouse.pk %}">{{ warehouse.name }}</a></li>
+    {% endfor %}
+
+</ul>
+  <a href="{% url 'warehouse_create'  %}">Create Warehouse</a>
+{% endblock %}

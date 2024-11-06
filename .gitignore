@@ -1,0 +1,33 @@
+# Virtual environment
+venv/
+
+# IDE settings
+.idea/
+.idea/dbnavigator.xml
+
+# Python cache
+__pycache__/
+
+# Django migration files, excluding __init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Environment variables
+.env
+
+# Uploaded media files
+media/
+
+# SQLite database
+*.sqlite3
+
+# PostgreSQL database dump files
+*.dump
+*.sql
+
+
+
+/migrations/.py
+/migrations/__init__.py
+
+media

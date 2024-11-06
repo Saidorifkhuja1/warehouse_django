@@ -1,0 +1,21 @@
+<!-- profile_detail.html -->
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile Detail</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Profile Detail</h1>
+    <p><strong>Name:</strong> {{ user.name }}</p>
+    <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+    <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+
+    <!-- Include the user's pk for the edit profile URL -->
+    <a href="{% url 'profile_update' pk=user.id %}">Edit Profile</a>
+    <a href="{% url 'profile_delete' %}">Delete Profile</a>
+    <a href="{% url 'password_reset' %}">Reset Password</a>
+</body>
+</html>
+

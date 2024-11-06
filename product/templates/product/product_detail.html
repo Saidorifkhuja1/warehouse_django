@@ -1,0 +1,17 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} Details</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <p><strong>Cost:</strong> {{ product.cost }}</p>
+    <p><strong>Amount:</strong> {{ product.amount }}</p>
+    <p><strong>Note:</strong> {{ product.note }}</p>
+    <a href="{% url 'product_update' product.id %}">Edit</a>
+    <a href="{% url 'product_delete' product.id %}">Delete</a>
+    <a href="{% url 'product_list' %}">Back to Product List</a>
+</body>
+</html>

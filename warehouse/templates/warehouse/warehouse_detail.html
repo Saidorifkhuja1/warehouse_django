@@ -1,0 +1,10 @@
+{% load static %}
+{% block content %}
+<h2>{{ warehouse.name }}</h2>
+<p>Address: {{ warehouse.address }}</p>
+<p>Phone: {{ warehouse.phone_number }}</p>
+<p>Description: {{ warehouse.description }}</p>
+<a href="{% url 'warehouse_update' warehouse.pk %}">Edit</a>
+<a href="{% url 'warehouse_delete' warehouse.pk %}">Delete</a>
+
+{% endblock %}

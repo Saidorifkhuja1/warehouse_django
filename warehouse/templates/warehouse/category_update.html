@@ -1,0 +1,17 @@
+<!-- templates/category/category_update.html -->
+
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>Update Category</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button type="submit" class="btn btn-primary">Update Category</button>
+      <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

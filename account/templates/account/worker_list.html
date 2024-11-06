@@ -1,0 +1,44 @@
+<!-- worker_list.html -->
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worker List</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Workers Created by You</h1>
+    {% if workers %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Last Name</th>
+                    <th>Phone Number</th>
+                    <th>Warehouse</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for worker in workers %}
+                <tr>
+                    <td>{{ worker.name }}</td>
+                    <td>{{ worker.last_name }}</td>
+                    <td>{{ worker.phone_number }}</td>
+                    <td>
+                        {% if worker.warehouse %}
+                            {{ worker.warehouse.name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No workers created by you.</p>
+    {% endif %}
+    <a href="{% url 'homepage' %}">Back to Homepage</a>
+</body>
+</html>
+

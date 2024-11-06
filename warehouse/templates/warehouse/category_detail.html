@@ -1,0 +1,7 @@
+{% load static %}
+{% block content %}
+<h2>{{ category.name }}</h2>
+<p>Warehouse: {{ category.warehouse.name }}</p>
+<a href="{% url 'category_update' category.pk %}">Edit</a>
+<a href="{% url 'category_delete' category.pk %}">Delete</a>
+{% endblock %}

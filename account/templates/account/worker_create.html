@@ -1,0 +1,18 @@
+<!-- worker_create.html -->
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Worker</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Create a New Worker</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Worker</button>
+    </form>
+    <a href="{% url 'worker_list' %}">Back to Worker List</a>
+</body>
+</html>
