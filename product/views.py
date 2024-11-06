@@ -35,7 +35,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'product'
 
 
-class ProductUpdateView(UpdateView):
+class SellProductView(UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'product/product_update.html'
