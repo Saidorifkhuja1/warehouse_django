@@ -35,74 +35,6 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'product'
 
 
-
-# class ProductUpdateView(UpdateView):
-#     model = Product
-#     form_class = ProductForm
-#     template_name = 'product/product_update.html'
-#     context_object_name = 'product'
-#
-#     def get_object(self, queryset=None):
-#         product = get_object_or_404(Product, pk=self.kwargs['pk'])
-#         return product
-#
-#     def form_valid(self, form):
-#         product = self.get_object()
-#         new_amount = form.cleaned_data['amount']
-#
-#         # Check if amount is less than current amount
-#         if new_amount < product.amount:
-#             # Subtract from current Product and update SoldProduct
-#             SoldProduct.objects.create(
-#                 name=product.name,
-#                 cost=product.cost,
-#                 amount=product.amount - new_amount,
-#                 note=product.note,
-#                 status='sotildi',  # Status should be 'sotildi' for SoldProduct
-#                 category=product.category
-#             )
-#             # Update Product amount to reflect the remaining amount
-#             product.amount = new_amount
-#             product.save()
-#
-#         elif new_amount >= product.amount:
-#             # If the entered amount is greater than or equal to the current amount, delete the product
-#             product.delete()
-#             # Create SoldProduct with the amount that was deleted
-#             SoldProduct.objects.create(
-#                 name=product.name,
-#                 cost=product.cost,
-#                 amount=product.amount,
-#                 note=product.note,
-#                 status='sotildi',
-#                 category=product.category
-#             )
-#
-#         # Handle status change to 'sotildi' for Product (but do not change Product's status to 'sotildi')
-#         if form.cleaned_data['status'] == 'sotildi':
-#             # Create a SoldProduct when status is 'sotildi'
-#             SoldProduct.objects.create(
-#                 name=product.name,
-#                 cost=product.cost,
-#                 amount=product.amount,
-#                 note=product.note,
-#                 status='sotildi',  # 'sotildi' for SoldProduct
-#                 category=product.category
-#             )
-#             # Ensure Product's status remains 'yangi'
-#             product.status = 'yangi'
-#             product.save()
-#
-#         # Continue with normal response after form submission
-#         messages.success(self.request, "Product updated successfully.")
-#         return redirect('product_list')
-#
-#     def form_invalid(self, form):
-#         # Handle invalid form submission (for example, invalid data)
-#         messages.error(self.request, "There was an error updating the product.")
-#         return self.render_to_response({'form': form})
-
-
 class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductForm
@@ -168,6 +100,27 @@ class ProductUpdateView(UpdateView):
         # Handle invalid form submission (for example, invalid data)
         messages.error(self.request, "There was an error updating the product.")
         return self.render_to_response({'form': form})
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        user = self.request.user
+
+        # Admins can see categories they created themselves and those created by other admins
+        if user.is_admin:
+            form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user)
+
+            # Check if user has a creator and get admins they created
+            if user.created_by:
+                # Add categories created by other admins if created_by is not None
+                form.fields['category'].queryset |= Category.objects.filter(
+                    warehouse__owner__in=user.created_by.get_admins())
+        else:
+            # Workers can only see categories created by their own admin
+            form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user.created_by)
+
+        return form
+
+
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
