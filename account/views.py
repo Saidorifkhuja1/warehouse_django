@@ -8,7 +8,7 @@ from .forms import *
 from .models import *
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
-
+from django.shortcuts import get_object_or_404
 
 
 
@@ -67,17 +67,7 @@ class RetrieveProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
 
-# class RetrieveProfileView(LoginRequiredMixin, DetailView):
-#     model = User
-#     template_name = 'account/profile_detail.html'
-#
-#     def get_object(self, queryset=None):
-#         return self.request.user  # Return the current user
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['user'] = self.object  # Pass the user object to the context
-#         return context
+
 
 
 
@@ -166,3 +156,29 @@ class WorkerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     # Filter workers to show only those created by the current admin
     def get_queryset(self):
         return User.objects.filter(created_by=self.request.user)
+
+
+
+
+
+
+
+
+class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = User
+    fields = ['name', 'last_name', 'phone_number', 'warehouse', 'photo', 'is_active', 'is_admin']
+    template_name = 'account/worker_update.html'
+    success_url = reverse_lazy('worker_list')  # Adjust this to your actual URL for worker listings
+
+    def get_object(self, queryset=None):
+        worker = get_object_or_404(User, pk=self.kwargs['pk'], created_by=self.request.user)
+        return worker
+
+    def form_valid(self, form):
+        # Ensure the creator can set is_admin to True if desired
+        return super().form_valid(form)
+
+    def test_func(self):
+        # Check if the current user is an admin and created this worker
+        worker = self.get_object()
+        return self.request.user.is_admin and worker.created_by == self.request.user

@@ -31,6 +31,9 @@
                             N/A
                         {% endif %}
                     </td>
+                    <td>
+                        <a href="{% url 'worker_update' worker.pk %}">Update</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -39,6 +42,7 @@
         <p>No workers created by you.</p>
     {% endif %}
     <a href="{% url 'homepage' %}">Back to Homepage</a>
+
 </body>
 </html>
 

@@ -1,20 +1,18 @@
-
-
-<!-- profile_update.html -->
+<!-- user_update.html -->
 {% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Update Profile</title>
+    <title>Update User Profile</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Update Profile</h1>
-    <form method="post">
+    <h1>Update User Profile</h1>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save Changes</button>
     </form>
-    <a href="{% url 'profile_detail'  %}"> Profile Details </a>
+    <a href="{% url 'worker_list' %}">Back to Worker List</a>
 </body>
 </html>
