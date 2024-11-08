@@ -1,12 +1,12 @@
-{% load static %}
+{% extends 'account/base.html' %}
 
 {% block content %}
+
 <h2>Categories</h2>
 <ul>
     {% for category in categories %}
-    <li><a href="{% url 'category_detail' category.pk %}">{{ category.name }}</a></li>
+        <li><a href="{% url 'product_list' category.pk %}">{{ category.name }}</a></li>
     {% endfor %}
-
 </ul>
-   <a href="{% url 'category_create'  %}">Create Category</a>
+<a href="{% url 'category_create' pk=warehouse.pk %}">Create Category</a>
 {% endblock %}

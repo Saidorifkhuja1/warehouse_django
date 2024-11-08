@@ -58,18 +58,3 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
 
-class WorkerUpdateForm(forms.ModelForm):
-    is_admin = forms.BooleanField(required=False, label="Admin Status")  # Explicitly add is_admin field
-
-    class Meta:
-        model = User
-        fields = ['name', 'last_name', 'phone_number', 'warehouse', 'photo', 'is_admin']  # Include is_admin in fields
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Pass the current user to the form
-        super().__init__(*args, **kwargs)
-
-        # Only allow the form to show `is_admin` if the logged-in user is eligible
-        if not (user and user.is_admin):
-            self.fields.pop('is_admin', None)
-

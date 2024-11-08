@@ -12,6 +12,6 @@
     <p><strong>Note:</strong> {{ product.note }}</p>
     <a href="{% url 'sell_product' product.id %}">Sell Product</a>
     <a href="{% url 'product_delete' product.id %}">Delete</a>
-    <a href="{% url 'product_list' %}">Back to Product List</a>
+    <a href="{% url 'product_list' category.pk %}">Back to Product List</a>
 </body>
 </html>

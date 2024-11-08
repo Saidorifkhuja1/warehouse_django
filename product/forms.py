@@ -1,6 +1,6 @@
 from django import forms
 from .models import Product
-from warehouse.models import Category
+from warehouse.models import Category,Warehouse
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -19,22 +19,19 @@ class ProductForm(forms.ModelForm):
             self.fields['category'].queryset = Category.objects.filter(warehouse__owner=user.owner)
 
 
-
-
-
-class ProductUpdateForm(forms.ModelForm):
-    sold_amount = forms.IntegerField(required=False, min_value=1)
-
+class ProductForm2(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'cost', 'amount', 'description', 'note', 'status', 'category']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        sold_amount = cleaned_data.get('sold_amount')
-        current_amount = self.instance.amount if self.instance else 0
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        warehouse_id = kwargs.pop('warehouse_id', None)  # Get warehouse_id from kwargs
+        super().__init__(*args, **kwargs)
 
-        if sold_amount and sold_amount > current_amount:
-            raise forms.ValidationError("Cannot sell more than available amount")
-
-        return cleaned_data
+        if user and user.is_admin:
+            if warehouse_id:
+                # Filter categories by the specific warehouse
+                self.fields['category'].queryset = Category.objects.filter(warehouse_id=warehouse_id)
+            else:
+                self.fields['category'].queryset = Category.objects.none()

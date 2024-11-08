@@ -5,21 +5,26 @@ from .models import *
 from .forms import *
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.urls import reverse
 
 
-class ProductCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = 'product/product_create.html'
-    success_url = reverse_lazy('product_list')
 
-    def test_func(self):
-        return self.request.user.is_admin  # Only admins can create products
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Retrieve the category object using the pk from the URL
+        context['category'] = get_object_or_404(Category, pk=self.kwargs['pk'])
+        return context
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user  # Pass the current user to the form
-        return kwargs
+    def form_valid(self, form):
+        # Set the category on the product instance before saving
+        form.instance.category = get_object_or_404(Category, pk=self.kwargs['pk'])
+        return super().form_valid(form)
+
+
 
 class ProductListView(LoginRequiredMixin, ListView):
     model = Product
@@ -27,12 +32,28 @@ class ProductListView(LoginRequiredMixin, ListView):
     context_object_name = 'products'
 
     def get_queryset(self):
-        return Product.objects.all()
+        # Get the category by pk from the URL
+        category = get_object_or_404(Category, pk=self.kwargs['pk'])
+        # Filter products by the retrieved category
+        return Product.objects.filter(category=category)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the category to the context to display it in the template if needed
+        context['category'] = get_object_or_404(Category, pk=self.kwargs['pk'])
+        return context
+
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = 'product/product_detail.html'
     context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Retrieve the category associated with the product and pass it to the context
+        context['category'] = self.object.category
+        return context
 
 
 class SellProductView(UpdateView):

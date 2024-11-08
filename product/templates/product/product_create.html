@@ -12,6 +12,7 @@
         {{ form.as_p }}
         <button type="submit">Save</button>
     </form>
-    <a href="{% url 'product_list' %}">Back to Product List</a>
+    <a href="{% url 'product_list' category.pk %}">Back to Product List</a>
 </body>
 </html>
+

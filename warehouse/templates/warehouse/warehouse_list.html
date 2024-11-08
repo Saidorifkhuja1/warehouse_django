@@ -1,11 +1,19 @@
 {% load static %}
 {% block content %}
-<h2>Warehouses</h2>
+<h2>Omborlar</h2>
 <ul>
     {% for warehouse in warehouses %}
-    <li><a href="{% url 'warehouse_detail' warehouse.pk %}">{{ warehouse.name }}</a></li>
+        <li>
+            <a href="{% url 'category_list' warehouse.pk%}">{{ warehouse.name }}</a>
+            <!-- Link to Category List -->
+<!--            <a href="{% url 'category_list' warehouse.pk %}">Categories</a>-->
+            <!-- Link to Warehouse Detail -->
+            <a href="{% url 'warehouse_detail' warehouse.pk %}">View Details</a>
+            <!-- Link to Edit Warehouse -->
+            <a href="{% url 'warehouse_update' warehouse.pk %}">Edit</a>
+        </li>
     {% endfor %}
-
 </ul>
-  <a href="{% url 'warehouse_create'  %}">Create Warehouse</a>
+<a href="{% url 'warehouse_create' %}">Create Warehouse</a>
 {% endblock %}
+

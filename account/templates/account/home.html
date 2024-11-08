@@ -1,15 +1,85 @@
 <!-- homepage.html -->
+{% extends 'account/base.html' %}
 {% load static %}
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Homepage</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+<!--        /* Reset some default styling */-->
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            background-color: #f0f2f5; /* Soft background color */-->
+<!--            color: #333; /* Text color */-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            height: 100vh;-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        /* Centered container styling */-->
+<!--        .container {-->
+<!--            text-align: center;-->
+<!--            padding: 2rem;-->
+<!--            background-color: #ffffff; /* White background */-->
+<!--            border-radius: 10px;-->
+<!--            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */-->
+<!--            max-width: 500px;-->
+<!--            width: 90%;-->
+<!--        }-->
+
+<!--        /* Header styling */-->
+<!--        h1 {-->
+<!--            font-size: 2rem;-->
+<!--            color: #4a90e2; /* Soft blue color */-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        /* Button styling */-->
+<!--        button {-->
+<!--            background-color: #4a90e2; /* Soft blue background */-->
+<!--            color: #ffffff;-->
+<!--            padding: 0.8rem 1.5rem;-->
+<!--            border: none;-->
+<!--            border-radius: 5px;-->
+<!--            font-size: 1rem;-->
+<!--            cursor: pointer;-->
+<!--            transition: background-color 0.3s ease;-->
+<!--        }-->
+
+<!--        button:hover {-->
+<!--            background-color: #357ABD; /* Darker blue on hover */-->
+<!--        }-->
+
+<!--        /* Optional: Add a subtle animation */-->
+<!--        @keyframes fadeIn {-->
+<!--            from {-->
+<!--                opacity: 0;-->
+<!--                transform: translateY(-10px);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 1;-->
+<!--                transform: translateY(0);-->
+<!--            }-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            animation: fadeIn 0.6s ease-out;-->
+<!--        }-->
+    </style>
 </head>
 <body>
-    <h1>Welcome, {{ user.name }}!</h1>
-
-
+    <div class="container">
+        <h1>Welcome, {{ user.name }}!</h1>
+        <button>Explore Now</button>
+    </div>
 </body>
 </html>

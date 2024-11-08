@@ -2,7 +2,9 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import *
+from django.urls import reverse
 from .forms import *
+from django.shortcuts import get_object_or_404
 
 class WarehouseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Warehouse
@@ -58,11 +60,30 @@ class WarehouseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         return self.request.user == self.get_object().owner  # Only the owner can delete the warehouse
 
+# class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+#     model = Category
+#     form_class = CategoryForm
+#     template_name = 'warehouse/category_create.html'
+#     success_url = reverse_lazy('category_list')
+#
+#     def test_func(self):
+#         return self.request.user.is_admin  # Only allow admins to create categories
+#
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs['user'] = self.request.user  # Pass the current user to the form
+#         return kwargs
+#
+#     def get_success_url(self):
+#         # Assume self.kwargs['pk'] is the warehouse pk
+#         return reverse('category_list', kwargs={'pk': self.kwargs['pk']})
+
+
+
 class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'warehouse/category_create.html'
-    success_url = reverse_lazy('category_list')
 
     def test_func(self):
         return self.request.user.is_admin  # Only allow admins to create categories
@@ -72,6 +93,18 @@ class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         kwargs['user'] = self.request.user  # Pass the current user to the form
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['warehouse'] = get_object_or_404(Warehouse, pk=self.kwargs['pk'])
+        return context
+
+    def get_success_url(self):
+        # Redirect to the category list view for the current warehouse
+        return reverse_lazy('category_list', kwargs={'pk': self.kwargs['pk']})
+
+
+
+
 
 class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
@@ -80,12 +113,22 @@ class CategoryListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
+        warehouse_id = self.kwargs['pk']  # Get warehouse ID from URL
+        warehouse = get_object_or_404(Warehouse, pk=warehouse_id)
+
         if user.is_admin:
-            # Admin sees categories for warehouses they own
-            return Category.objects.filter(warehouse__owner=user)
+            # Admin sees categories for the specific warehouse they own
+            return Category.objects.filter(warehouse=warehouse, warehouse__owner=user)
         else:
-            # Workers or other users can see categories linked to their admin’s warehouses
-            return Category.objects.filter(warehouse__owner=user.owner) if hasattr(user, 'owner') else Category.objects.none()
+            # Workers or other users see categories linked to their admin’s warehouses
+            return Category.objects.filter(warehouse=warehouse, warehouse__owner=user.owner) if hasattr(user, 'owner') else Category.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['warehouse'] = get_object_or_404(Warehouse, pk=self.kwargs['pk'])
+        return context
+
+
 
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
@@ -98,7 +141,6 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'warehouse/category_update.html'
-    success_url = reverse_lazy('category_list')
 
     def test_func(self):
         user = self.request.user
@@ -110,6 +152,16 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user  # Pass the current user to the form
         return kwargs
+
+    def get_success_url(self):
+        # Redirect to the category list view for the current warehouse
+        return reverse_lazy('category_list', kwargs={'pk': self.get_object().warehouse.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['warehouse'] = self.get_object().warehouse  # Pass warehouse to template
+        return context
+
 
 
 class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

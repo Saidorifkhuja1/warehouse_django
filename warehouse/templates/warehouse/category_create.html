@@ -10,7 +10,8 @@
       {{ form.as_p }}
 
       <button type="submit" class="btn btn-success">Create Category</button>
-      <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+      <a href="{% url 'category_list' pk=warehouse.pk %}" class="btn btn-secondary">Cancel</a>
+
     </form>
   </div>
 {% endblock %}

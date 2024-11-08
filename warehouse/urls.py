@@ -12,8 +12,8 @@ urlpatterns = [
     path('warehouses/delete/<int:pk>/', WarehouseDeleteView.as_view(), name='warehouse_delete'),
 
     # Category URLs
-    path('categories_list/', CategoryListView.as_view(), name='category_list'),
-    path('categories_create/', CategoryCreateView.as_view(), name='category_create'),
+    path('warehouses/<int:pk>/categories_list/', CategoryListView.as_view(), name='category_list'),
+    path('warehouses/<int:pk>/categories_create/', CategoryCreateView.as_view(), name='category_create'),
     path('categories_detail/<int:pk>/', CategoryDetailView.as_view(), name='category_detail'),
     path('categories/update/<int:pk>/', CategoryUpdateView.as_view(), name='category_update'),
     path('categories/delete/<int:pk>/', CategoryDeleteView.as_view(), name='category_delete'),
