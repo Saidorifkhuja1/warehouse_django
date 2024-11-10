@@ -8,22 +8,39 @@ from django.contrib import messages
 from django.urls import reverse
 
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
+
+
+class ProductCreateView(CreateView):
     model = Product
-    form_class = ProductForm
+    fields = ['name', 'cost', 'amount', 'description', 'note', 'status', 'category']
     template_name = 'product/product_create.html'
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+
+        # Get the current user
+        user = self.request.user
+
+        # Find warehouses created by the user or the user's creator
+        user_warehouses = Warehouse.objects.filter(
+            owner__in=[user, user.created_by]
+        )
+
+        # Filter categories based on these warehouses
+        form.fields['category'].queryset = Category.objects.filter(
+            warehouse__in=user_warehouses
+        )
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Retrieve the category object using the pk from the URL
         context['category'] = get_object_or_404(Category, pk=self.kwargs['pk'])
         return context
 
-    def form_valid(self, form):
-        # Set the category on the product instance before saving
-        form.instance.category = get_object_or_404(Category, pk=self.kwargs['pk'])
-        return super().form_valid(form)
-
+    def get_success_url(self):
+        # Redirect to the product list or a specific page after successful creation
+        return reverse('product_list', kwargs={'pk': self.kwargs['pk']})
 
 
 class ProductListView(LoginRequiredMixin, ListView):
@@ -140,6 +157,8 @@ class SellProductView(UpdateView):
             form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user.created_by)
 
         return form
+
+
 
 
 

@@ -11,11 +11,9 @@
         {% for product in products %}
             <li>
                 <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
-
             </li>
         {% endfor %}
     </ul>
     <a href="{% url 'product_create' category.pk %}">Create a New Product</a>
-
 </body>
 </html>

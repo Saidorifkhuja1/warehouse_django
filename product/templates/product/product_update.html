@@ -17,7 +17,7 @@
             <button type="submit">Update Product</button>
         </form>
 
-        <a href="{% url 'product_list' %}">Back to Product List</a>  <!-- Link back to product list -->
+        <a href="{% url 'product_list' category.pk %}">Back to Product List</a>  <!-- Link back to product list -->
 
         {% if form.non_field_errors %}
             <div class="error">
