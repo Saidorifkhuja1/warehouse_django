@@ -1,16 +1,23 @@
+{% extends 'account/base.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Delete Warehouse</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <h1>Are you sure you want to delete "{{ object.name }}"?</h1>
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Confirm Deletion</h2>
+
+    <div class="alert alert-warning">
+        <h4 class="alert-heading">Are you sure you want to delete the warehouse "{{ object.name }}"?</h4>
+        <p>This action cannot be undone. Please confirm if you want to proceed.</p>
+    </div>
+
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Confirm Delete</button>
+        <div class="d-flex justify-content-between">
+            <!-- Cancel button first, then Confirm Delete button -->
+            <a href="{% url 'warehouse_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+            <button type="submit" class="btn btn-danger btn-lg">Confirm Delete</button>
+        </div>
     </form>
-    <a href="{% url 'warehouse_list' %}">Cancel</a>
-</body>
-</html>
+</div>
+{% endblock %}
+

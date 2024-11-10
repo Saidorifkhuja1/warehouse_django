@@ -1,10 +1,31 @@
+{% extends 'account/base.html' %}
 {% load static %}
-{% block content %}
-<h2>{{ warehouse.name }}</h2>
-<p>Address: {{ warehouse.address }}</p>
-<p>Phone: {{ warehouse.phone_number }}</p>
-<p>Description: {{ warehouse.description }}</p>
-<a href="{% url 'warehouse_update' warehouse.pk %}">Edit</a>
-<a href="{% url 'warehouse_delete' warehouse.pk %}">Delete</a>
 
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">{{ warehouse.name }}</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Address:</strong> {{ warehouse.address }}</p>
+            <p><strong>Phone:</strong> {{ warehouse.phone_number }}</p>
+            <p><strong>Description:</strong> {{ warehouse.description }}</p>
+        </div>
+        <div class="col-md-6">
+            <!-- You can add an image or other content about the warehouse here, if available -->
+            <!-- <img src="{{ warehouse.image.url }}" class="img-fluid" alt="{{ warehouse.name }}"> -->
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <!-- Edit and Delete Buttons -->
+        <a href="{% url 'warehouse_update' warehouse.pk %}" class="btn btn-warning btn-lg">Edit</a>
+        <a href="{% url 'warehouse_delete' warehouse.pk %}" class="btn btn-danger btn-lg">Delete</a>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-3">
+        <a href="{% url 'warehouse_list' %}" class="btn btn-secondary btn-lg">Back to Warehouse List</a>
+    </div>
+</div>
 {% endblock %}

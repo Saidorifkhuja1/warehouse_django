@@ -1,12 +1,96 @@
 {% extends 'account/base.html' %}
+{% load static %}
 
 {% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Categories</h2>
 
-<h2>Categories</h2>
-<ul>
-    {% for category in categories %}
-        <li><a href="{% url 'product_list' category.pk %}">{{ category.name }}</a></li>
-    {% endfor %}
-</ul>
-<a href="{% url 'category_create' pk=warehouse.pk %}">Create Category</a>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" style="width: 100%; max-width: 1200px; margin: auto;">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Category Name</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td style="color: black; font-weight: bold;">
+                            {{ category.name }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'product_list' category.pk %}" class="btn custom-product-btn btn-sm">Products</a>
+                            <a href="{% url 'sold_product_list' category.pk %}" class="btn custom-product-btn btn-sm">Sold Products</a>
+                            <a href="{% url 'category_detail' category.pk %}" class="btn custom-detail-btn btn-sm">Details</a>
+                            <a href="{% url 'category_update' category.pk %}" class="btn custom-update-btn btn-sm">Edit</a>
+                            <a href="{% url 'category_delete' category.pk %}" class="btn custom-delete-btn btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No categories available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'category_create' pk=warehouse.pk %}" class="btn btn-lg custom-create-btn">Create New Category</a>
+    </div>
+</div>
+
+<style>
+    /* Style table for a larger look */
+    .table {
+        font-size: 1.1rem;
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    /* Button styles for category actions */
+    .custom-product-btn {
+        background-color: #6C757D;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-detail-btn {
+        background-color: #17A2B8;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-update-btn {
+        background-color: #FFC107;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-delete-btn {
+        background-color: #DC3545;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-create-btn {
+        background-color: #007BFF;
+        color: white;
+        border-radius: 20px;
+        padding: 10px 20px;
+    }
+
+    /* Adjust container width */
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Add hover effects for buttons */
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+
 {% endblock %}

@@ -1,19 +1,89 @@
+{% extends 'account/base.html' %}
 {% load static %}
+
 {% block content %}
-<h2>Omborlar</h2>
-<ul>
-    {% for warehouse in warehouses %}
-        <li>
-            <a href="{% url 'category_list' warehouse.pk%}">{{ warehouse.name }}</a>
-            <!-- Link to Category List -->
-<!--            <a href="{% url 'category_list' warehouse.pk %}">Categories</a>-->
-            <!-- Link to Warehouse Detail -->
-            <a href="{% url 'warehouse_detail' warehouse.pk %}">View Details</a>
-            <!-- Link to Edit Warehouse -->
-            <a href="{% url 'warehouse_update' warehouse.pk %}">Edit</a>
-        </li>
-    {% endfor %}
-</ul>
-<a href="{% url 'warehouse_create' %}">Create Warehouse</a>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Omborlar</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" style="width: 100%; max-width: 1200px; margin: auto;">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Warehouse Name</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for warehouse in warehouses %}
+                    <tr>
+                        <td style="color: black; font-weight: bold;">
+                            {{ warehouse.name }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'category_list' warehouse.pk %}" class="btn custom-category-btn btn-sm">Categories</a>
+                            <a href="{% url 'warehouse_detail' warehouse.pk %}" class="btn custom-detail-btn btn-sm">View Details</a>
+                            <a href="{% url 'warehouse_update' warehouse.pk %}" class="btn custom-update-btn btn-sm">Edit</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No warehouses available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'warehouse_create' %}" class="btn btn-lg custom-create-btn">Create Warehouse</a>
+    </div>
+</div>
+
+<style>
+    /* Style table for a larger look */
+    .table {
+        font-size: 1.1rem;
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    /* Button styles for warehouse actions */
+    .custom-category-btn {
+        background-color: #6C757D;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-detail-btn {
+        background-color: #17A2B8;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-update-btn {
+        background-color: #FFC107;
+        color: white;
+        border-radius: 12px;
+    }
+
+    .custom-create-btn {
+        background-color: #007BFF;
+        color: white;
+        border-radius: 20px;
+        padding: 10px 20px;
+    }
+
+    /* Adjust container width */
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Add hover effects for buttons */
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
 {% endblock %}
+
 

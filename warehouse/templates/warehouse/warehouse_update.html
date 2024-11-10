@@ -1,16 +1,25 @@
 <!-- templates/warehouse/warehouse_update.html -->
+{% extends 'account/base.html' %}
 {% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h2>Update Warehouse</h2>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Update Warehouse</h2>
 
     <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
+        {% csrf_token %}
 
-      <button type="submit" class="btn btn-primary">Update Warehouse</button>
-      <a href="{% url 'warehouse_list' %}" class="btn btn-secondary">Cancel</a>
+        <!-- Form Fields -->
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="d-flex justify-content-between mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Update Warehouse</button>
+            <a href="{% url 'warehouse_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
     </form>
-  </div>
+</div>
 {% endblock %}
+

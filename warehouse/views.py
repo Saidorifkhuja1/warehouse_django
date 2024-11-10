@@ -27,13 +27,16 @@ class WarehouseListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        # Admins should see only warehouses they created, and their workers or other admins can view these as well
         if user.is_admin:
-            # Filter to include only warehouses owned by the admin
+            # Admins should see only warehouses they created
             return Warehouse.objects.filter(owner=user)
         else:
-            # For workers/admins created by the current admin
-            return Warehouse.objects.filter(owner=user.owner) if hasattr(user, 'owner') else Warehouse.objects.none()
+            # Workers should see warehouses connected to them and those created by their creator
+            creator = user.owner if hasattr(user, 'owner') else None
+            if creator:
+                # Filter warehouses owned by the creator or assigned to the worker
+                return Warehouse.objects.filter(owner=creator) | Warehouse.objects.filter(connected_users=user)
+            return Warehouse.objects.none()
 
 
 class WarehouseDetailView(LoginRequiredMixin, DetailView):
@@ -60,23 +63,7 @@ class WarehouseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         return self.request.user == self.get_object().owner  # Only the owner can delete the warehouse
 
-# class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-#     model = Category
-#     form_class = CategoryForm
-#     template_name = 'warehouse/category_create.html'
-#     success_url = reverse_lazy('category_list')
-#
-#     def test_func(self):
-#         return self.request.user.is_admin  # Only allow admins to create categories
-#
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs['user'] = self.request.user  # Pass the current user to the form
-#         return kwargs
-#
-#     def get_success_url(self):
-#         # Assume self.kwargs['pk'] is the warehouse pk
-#         return reverse('category_list', kwargs={'pk': self.kwargs['pk']})
+
 
 
 
@@ -136,6 +123,11 @@ class CategoryDetailView(LoginRequiredMixin, DetailView):
     template_name = 'warehouse/category_detail.html'
     context_object_name = 'category'
 
+    def get_success_url(self):
+        # Redirect to the category list of the related warehouse
+        return reverse_lazy('category_list', kwargs={'pk': self.object.warehouse.pk})
+
+
 
 class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Category
@@ -164,12 +156,21 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 
+# class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+#     model = Category
+#     template_name = 'warehouse/category_delete.html'
+#     success_url = reverse_lazy('category_list')
+#
+#     def test_func(self):
+#         return self.request.user.is_admin  # Only admins can delete categories
+
 class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Category
     template_name = 'warehouse/category_delete.html'
-    success_url = reverse_lazy('category_list')
+
+    def get_success_url(self):
+        # Redirect to the category list of the related warehouse
+        return reverse_lazy('category_list', kwargs={'pk': self.object.warehouse.pk})
 
     def test_func(self):
-        return self.request.user.is_admin  # Only admins can delete categories
-
-
+        return self.request.user.is_admin

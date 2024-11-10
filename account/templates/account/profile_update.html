@@ -1,20 +1,20 @@
+{% extends 'account/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Update Profile</h1>
 
+    <div class="card mx-auto shadow-sm p-4" style="max-width: 500px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Save Changes</button>
+        </form>
 
-<!-- profile_update.html -->
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Update Profile</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <h1>Update Profile</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Changes</button>
-    </form>
-    <a href="{% url 'profile_detail'  %}"> Profile Details </a>
-</body>
-</html>
+        <div class="text-center mt-3">
+            <a href="{% url 'profile_detail' %}" class="btn btn-secondary">Back to Profile Details</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

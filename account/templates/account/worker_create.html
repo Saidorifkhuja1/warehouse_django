@@ -1,18 +1,20 @@
 <!-- worker_create.html -->
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create Worker</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <h1>Create a New Worker</h1>
-    <form method="post" enctype="multipart/form-data">
+{% extends 'account/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Create a New Worker</h1>
+
+    <form method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create Worker</button>
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block">Create Worker</button>
     </form>
-    <a href="{% url 'worker_list' %}">Back to Worker List</a>
-</body>
-</html>
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'worker_list' %}" class="btn btn-primary">Back to Worker List</a>
+    </div>
+</div>
+{% endblock %}

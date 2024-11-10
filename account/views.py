@@ -9,7 +9,7 @@ from .models import *
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
-
+from django.contrib.auth import logout
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -182,3 +182,8 @@ class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Check if the current user is an admin and created this worker
         worker = self.get_object()
         return self.request.user.is_admin and worker.created_by == self.request.user
+
+
+def custom_logout(request):
+    logout(request)  # Logs out the user
+    return redirect('login')

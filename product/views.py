@@ -51,8 +51,8 @@ class ProductListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         # Get the category by pk from the URL
         category = get_object_or_404(Category, pk=self.kwargs['pk'])
-        # Filter products by the retrieved category
-        return Product.objects.filter(category=category)
+        # Filter products by the retrieved category and order by the created_at field in descending order
+        return Product.objects.filter(category=category).order_by('-add_time')  # Assuming 'created_at' is the field for creation date
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -72,11 +72,12 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
         context['category'] = self.object.category
         return context
 
+from django.core.exceptions import ValidationError
 
 class SellProductView(UpdateView):
     model = Product
     form_class = ProductForm
-    template_name = 'product/product_update.html'
+    template_name = 'product/sell_product.html'
     context_object_name = 'product'
 
     def get_object(self, queryset=None):
@@ -85,79 +86,129 @@ class SellProductView(UpdateView):
         return product
 
     def form_valid(self, form):
-        # Retrieve the product object and the new amount entered in the form
+        # Retrieve the product object and the amount entered in the form
         product = self.get_object()
-        new_amount = form.cleaned_data['amount']
+        entered_amount = form.cleaned_data['amount']
+        new_status = form.cleaned_data['status']
 
-        # Case 1: When the entered amount is less than the current amount of the product
-        if new_amount < product.amount:
-            # Calculate the difference (this is the amount to be sold)
-            sold_amount = new_amount
+        # Validate that the entered amount is not greater than the current amount
+        if entered_amount > product.amount:
+            form.add_error('amount', 'You cannot enter an amount greater than the current amount.')
+            return self.form_invalid(form)
 
-            # Create a new SoldProduct with the amount of sold products
+        # Calculate the new amount by subtracting the entered amount
+        new_amount = product.amount - entered_amount
+
+        # Check if the status is changing to 'sotildi'
+        if new_status == 'sotildi':
+            # Create a new SoldProduct with the amount sold
             SoldProduct.objects.create(
                 name=product.name,
                 cost=product.cost,
-                amount=sold_amount,
+                amount=entered_amount,
                 note=product.note,
-                status='sotildi',  # 'sotildi' status for SoldProduct
+                status='sotildi',
                 category=product.category
             )
 
-            # Update the product's amount to the new amount entered
-            product.amount -= sold_amount  # Subtract sold amount from product
+            # Update the product's amount to the calculated new amount
+            product.amount = new_amount
+            if new_amount == 0:
+                # If all of the amount is sold, delete the product
+                product.delete()
+            else:
+                # If some amount remains, reset the status to 'yangi'
+                product.status = 'yangi'
+                product.save()
+        else:
+            # If status is not 'sotildi', just update the amount
+            product.amount = new_amount
             product.save()
 
-        # Case 2: When the entered amount is greater than or equal to the current amount
-        elif new_amount >= product.amount:
-            # Create a SoldProduct for the full amount of the current product
-            SoldProduct.objects.create(
-                name=product.name,
-                cost=product.cost,
-                amount=product.amount,  # Use the full amount of the product
-                note=product.note,
-                status='sotildi',  # 'sotildi' for SoldProduct
-                category=product.category
-            )
-
-            # Delete the product since its amount is sold out or updated
-            product.delete()
-
-        # Ensure that the status of the product remains 'yangi'
-        # Even if the user tries to set status to 'sotildi', it should not change the status of the product
-        if form.cleaned_data['status'] == 'sotildi':
-            # No need to change the product status, it should remain 'yangi'
-            product.status = 'yangi'
-            product.save()
-
-        # Provide feedback and redirect
         messages.success(self.request, "Product updated successfully.")
-        return redirect('product_list')
+        return redirect(self.get_success_url())
 
-    def form_invalid(self, form):
-        # Handle invalid form submission (for example, invalid data)
-        messages.error(self.request, "There was an error updating the product.")
-        return self.render_to_response({'form': form})
+    def get_success_url(self):
+        # Redirect to the product list for the current product's category
+        return reverse('product_list', kwargs={'pk': self.object.category.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.object.category  # Pass the category of the current product
+        return context
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         user = self.request.user
 
-        # Admins can see categories they created themselves and those created by other admins
         if user.is_admin:
             form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user)
-
-            # Check if user has a creator and get admins they created
             if user.created_by:
-                # Add categories created by other admins if created_by is not None
                 form.fields['category'].queryset |= Category.objects.filter(
-                    warehouse__owner__in=user.created_by.get_admins())
+                    warehouse__owner__in=user.created_by.get_admins()
+                )
         else:
-            # Workers can only see categories created by their own admin
             form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user.created_by)
 
         return form
 
+
+class SoldProductListView(LoginRequiredMixin, ListView):
+    model = SoldProduct
+    template_name = 'product/sold_product_list.html'
+    context_object_name = 'sold_products'
+
+    def get_queryset(self):
+        # Get the category by pk from the URL
+        category = get_object_or_404(Category, pk=self.kwargs['pk'])
+        # Filter products by the retrieved category and order by the created_at field in descending order
+        return SoldProduct.objects.filter(category=category).order_by('-add_time')  # Assuming 'created_at' is the field for creation date
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the category to the context to display it in the template if needed
+        context['category'] = get_object_or_404(Category, pk=self.kwargs['pk'])
+        return context
+
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    fields = ['name', 'cost', 'amount', 'description', 'note', 'status', 'category']
+    template_name = 'product/product_update.html'
+    context_object_name = 'product'
+
+    def get_object(self, queryset=None):
+        # Fetch the specific product being updated based on the primary key (pk)
+        return get_object_or_404(Product, pk=self.kwargs['pk'])
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+
+        # Get the current user
+        user = self.request.user
+
+        # Find warehouses created by the user or the user's creator
+        user_warehouses = Warehouse.objects.filter(
+            owner__in=[user, user.created_by]
+        )
+
+        # Filter categories based on these warehouses
+        form.fields['category'].queryset = Category.objects.filter(
+            warehouse__in=user_warehouses
+        )
+
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the category associated with the current product
+        context['category'] = self.object.category
+        return context
+
+    def get_success_url(self):
+        # Redirect to the product list after a successful update
+        return reverse('product_list', kwargs={'pk': self.object.category.pk})
 
 
 

@@ -1,16 +1,22 @@
+{% extends 'account/base.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Delete Category</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <h1>Are you sure you want to delete "{{ object.name }}"?</h1>
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Confirm Deletion</h2>
+
+    <div class="alert alert-warning mt-4">
+        <h4 class="alert-heading">Are you sure you want to delete "{{ object.name }}"?</h4>
+        <p>This action cannot be undone. Please confirm if you want to proceed.</p>
+    </div>
+
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Confirm Delete</button>
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-danger mr-3">Confirm Delete</button>
+            <a href="{% url 'category_list' pk=object.warehouse.pk %}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
-    <a href="{% url 'category_list' %}">Cancel</a>
-</body>
-</html>
+</div>
+{% endblock %}
+
