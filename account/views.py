@@ -180,15 +180,6 @@ class PasswordResetView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-
-
-from django.urls import reverse_lazy
-from django.shortcuts import render
-from .models import Warehouse
-from .forms import WorkerForm
-from django.views.generic import CreateView
-from django.contrib.auth.mixins import UserPassesTestMixin
-
 class WorkerCreateView(UserPassesTestMixin, CreateView):
     model = User
     form_class = WorkerForm
@@ -199,10 +190,8 @@ class WorkerCreateView(UserPassesTestMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        warehouse_id = self.kwargs.get('warehouse_id')
-        if warehouse_id:
-            # Ensure that only workers for the specific warehouse are created
-            form.fields['warehouse'].queryset = Warehouse.objects.filter(id=warehouse_id, owner=self.request.user)
+        # Limit the queryset of the warehouse field to those created by the current admin
+        form.fields['warehouse'].queryset = Warehouse.objects.filter(owner=self.request.user)
         return form
 
     def form_valid(self, form):
@@ -218,8 +207,11 @@ class WorkerCreateView(UserPassesTestMixin, CreateView):
         return context
 
     def get_success_url(self):
-        # Redirect to the homepage (update this line)
-        return reverse_lazy('homepage')  # Replace 'home' with the actual name of your homepage URL pattern
+        # Redirect to the homepage
+        return reverse_lazy('homepage')
+
+
+# Replace 'home' with the actual name of your homepage URL pattern
 
 
 
