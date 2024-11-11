@@ -211,7 +211,7 @@ class WorkerCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('homepage')
 
 
-# Replace 'home' with the actual name of your homepage URL pattern
+
 
 
 

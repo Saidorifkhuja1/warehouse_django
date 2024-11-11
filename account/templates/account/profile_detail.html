@@ -1,10 +1,18 @@
 {% extends 'account/base.html' %}
+{% load static %}
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Profile Detail</h1>
 
     <div class="card mx-auto shadow-sm" style="max-width: 500px;">
-        <div class="card-body">
+        <div class="card-body text-center">
+            <!-- Display user's photo if available, otherwise show a placeholder -->
+            {% if user.photo %}
+                <img src="{{ user.photo.url }}" alt="User Photo" class="img-thumbnail mb-3" style="width: 150px; height: 150px;">
+            {% else %}
+                <img src="{% static 'img/placeholder.jpg' %}" alt="No Photo" class="img-thumbnail mb-3" style="width: 150px; height: 150px;">
+            {% endif %}
+
             <p class="card-text"><strong>Name:</strong> {{ user.name }}</p>
             <p class="card-text"><strong>Last Name:</strong> {{ user.last_name }}</p>
             <p class="card-text"><strong>Phone Number:</strong> {{ user.phone_number }}</p>
