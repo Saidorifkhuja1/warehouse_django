@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.views.generic import View, CreateView, DetailView, UpdateView, \
     DeleteView, FormView, TemplateView, ListView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
@@ -10,18 +11,39 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
+from django.shortcuts import render
+from .models import Warehouse
 
 
-class HomePageView(LoginRequiredMixin, TemplateView):
+
+
+class HomePageView(LoginRequiredMixin, ListView):
+    model = Warehouse
     template_name = 'account/home.html'
+    context_object_name = 'warehouses'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:
+            # Admins should see only warehouses they created
+            return Warehouse.objects.filter(owner=user)
+        else:
+            # Workers should see warehouses connected to them and those created by their creator
+            creator = user.owner if hasattr(user, 'owner') else None
+            if creator:
+                # Filter warehouses owned by the creator or assigned to the worker
+                return Warehouse.objects.filter(owner=creator) | Warehouse.objects.filter(connected_users=user)
+            return Warehouse.objects.none()
 
 
+
+
+from django.urls import reverse_lazy
 
 class WorkerCreateView(UserPassesTestMixin, CreateView):
     model = User
     form_class = WorkerForm
     template_name = 'account/worker_create.html'
-    success_url = reverse_lazy('worker_list')
 
     def test_func(self):
         return self.request.user.is_admin  # Only allow admin users to access
@@ -35,7 +57,25 @@ class WorkerCreateView(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         form.instance.is_admin = False  # Ensure the worker cannot be an admin
         form.instance.created_by = self.request.user  # Set created_by to the current admin
-        return super().form_valid(form)
+        # Save the worker object first
+        response = super().form_valid(form)
+        # At this point, the worker is saved, so we can now access the warehouse ID
+        self.warehouse_id = form.instance.warehouse.id  # Get the warehouse ID from the worker instance
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the warehouse_id to the context, default to None if not set
+        context['warehouse_id'] = getattr(self, 'warehouse_id', None)
+        return context
+
+    def get_success_url(self):
+        # Ensure warehouse_id is passed in the success URL
+        if hasattr(self, 'warehouse_id'):
+            return reverse_lazy('worker_list', kwargs={'warehouse_id': self.warehouse_id})
+        return reverse_lazy('worker_list')  # Fallback in case warehouse_id is not available
+
+
 
 class LoginView(View):
     template_name = 'account/login.html'
@@ -142,20 +182,72 @@ class PasswordResetView(LoginRequiredMixin, FormView):
 
 
 
+from django.urls import reverse_lazy
+from django.shortcuts import render
+from .models import Warehouse
+from .forms import WorkerForm
+from django.views.generic import CreateView
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+class WorkerCreateView(UserPassesTestMixin, CreateView):
+    model = User
+    form_class = WorkerForm
+    template_name = 'account/worker_create.html'
+
+    def test_func(self):
+        return self.request.user.is_admin  # Only allow admin users to access
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        warehouse_id = self.kwargs.get('warehouse_id')
+        if warehouse_id:
+            # Ensure that only workers for the specific warehouse are created
+            form.fields['warehouse'].queryset = Warehouse.objects.filter(id=warehouse_id, owner=self.request.user)
+        return form
+
+    def form_valid(self, form):
+        form.instance.is_admin = False  # Ensure the worker cannot be an admin
+        form.instance.created_by = self.request.user  # Set created_by to the current admin
+        response = super().form_valid(form)
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        warehouse_id = self.kwargs.get('warehouse_id')
+        context['warehouse_id'] = warehouse_id  # Pass warehouse_id to the template
+        return context
+
+    def get_success_url(self):
+        # Redirect to the homepage (update this line)
+        return reverse_lazy('homepage')  # Replace 'home' with the actual name of your homepage URL pattern
 
 
-class WorkerListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+
+
+
+
+class WorkerListView(ListView):
     model = User
     template_name = 'account/worker_list.html'
     context_object_name = 'workers'
 
-    # Only admins can access this view
-    def test_func(self):
-        return self.request.user.is_admin
-
-    # Filter workers to show only those created by the current admin
     def get_queryset(self):
-        return User.objects.filter(created_by=self.request.user)
+        # Get the warehouse by ID (from URL)
+        warehouse_id = self.kwargs.get('warehouse_id')
+        warehouse = get_object_or_404(Warehouse, pk=warehouse_id)
+
+        # Filter users who are workers (is_admin=False), assigned to the current warehouse
+        return User.objects.filter(warehouse=warehouse, is_admin=False, created_by=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        warehouse_id = self.kwargs.get('warehouse_id')
+        context['warehouse'] = get_object_or_404(Warehouse, pk=warehouse_id)
+        return context
+
+
+
+
 
 
 
@@ -168,7 +260,7 @@ class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     fields = ['name', 'last_name', 'phone_number', 'warehouse', 'photo', 'is_active', 'is_admin']
     template_name = 'account/worker_update.html'
-    success_url = reverse_lazy('worker_list')  # Adjust this to your actual URL for worker listings
+
 
     def get_object(self, queryset=None):
         worker = get_object_or_404(User, pk=self.kwargs['pk'], created_by=self.request.user)
@@ -178,10 +270,44 @@ class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Ensure the creator can set is_admin to True if desired
         return super().form_valid(form)
 
+    def get_success_url(self):
+        # Dynamically generate the success URL with warehouse_id
+        worker = self.get_object()
+        return reverse_lazy('worker_list', kwargs={'warehouse_id': worker.warehouse.pk})
+
     def test_func(self):
         # Check if the current user is an admin and created this worker
         worker = self.get_object()
         return self.request.user.is_admin and worker.created_by == self.request.user
+
+
+class WorkerDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = User
+    template_name = 'account/worker_delete.html'
+
+    def get_object(self):
+        # Get the worker to be deleted
+        return self.get_queryset().get(pk=self.kwargs['pk'])
+
+    def test_func(self):
+        # Only allow deletion if the user is an admin
+        return self.request.user.is_admin
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the warehouse ID from the worker object if available
+        warehouse = self.get_object().warehouse if hasattr(self.get_object(), 'warehouse') else None
+        context['warehouse_id'] = warehouse.pk if warehouse else None
+        return context
+
+    def get_success_url(self):
+        # Redirect to the worker list page for the associated warehouse after deletion
+        warehouse_id = self.get_object().warehouse.pk if hasattr(self.get_object(), 'warehouse') else None
+        if warehouse_id:
+            return reverse('worker_list', kwargs={'warehouse_id': warehouse_id})
+        else:
+            # Redirect to a default worker list or home page if warehouse_id is not found
+            return reverse('home')
 
 
 def custom_logout(request):

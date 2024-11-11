@@ -1,0 +1,26 @@
+{% extends 'account/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Delete Profile</h1>
+
+    <div class="card mx-auto shadow-sm p-4" style="max-width: 500px;">
+        <p class="text-center mb-4">Are you sure you want to delete your profile? This action cannot be undone.</p>
+
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-block mb-2">Yes, Delete Profile</button>
+        </form>
+
+        <div class="text-center">
+            <!-- Using warehouse_id passed to context -->
+            {% if warehouse_id %}
+                <a href="{% url 'worker_list' warehouse_id=warehouse_id %}" class="btn btn-secondary">No, Cancel</a>
+            {% else %}
+                <!-- If warehouse_id is not available, redirect to a default worker list or homepage -->
+                <a href="{% url 'worker_list' warehouse_id=default_warehouse_id %}" class="btn btn-secondary">No, Cancel</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

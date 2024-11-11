@@ -1,4 +1,3 @@
-<!-- worker_list.html -->
 {% extends 'account/base.html' %}
 {% block content %}
 <div class="container mt-5">
@@ -30,7 +29,11 @@
                         {% endif %}
                     </td>
                     <td>
+                        <!-- Worker Update Button -->
                         <a href="{% url 'worker_update' worker.pk %}" class="btn btn-warning btn-sm">Update</a>
+
+                        <a href="{% url 'worker_delete' pk=worker.pk %}" class="btn btn-danger btn-sm">Delete</a>
+
                     </td>
                 </tr>
                 {% endfor %}
@@ -43,7 +46,9 @@
 
     <div class="text-center mt-4">
         <a href="{% url 'homepage' %}" class="btn btn-primary">Back to Homepage</a>
+        <a href="{% url 'worker_create' %}" class="btn btn-primary">Worker Create </a>
     </div>
 </div>
 {% endblock %}
+
 

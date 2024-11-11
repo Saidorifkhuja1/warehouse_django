@@ -13,7 +13,7 @@
     </form>
 
     <div class="mt-4 text-center">
-        <a href="{% url 'worker_list' %}" class="btn btn-primary">Back to Worker List</a>
+        <a href="{% url 'worker_list' warehouse_id=object.warehouse.pk %}" class="btn btn-primary">Back to Worker List</a>
     </div>
 </div>
 {% endblock %}
