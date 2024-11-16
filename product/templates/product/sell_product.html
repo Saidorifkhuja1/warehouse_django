@@ -19,10 +19,12 @@
         <form method="post">
           {% csrf_token %}
 
+          <h4>Until updating status of product you can not sell it </h4>
           {{ form.as_p }}  <!-- Renders all fields in the form -->
 
           <!-- Submit Button -->
           <div class="d-flex justify-content-between">
+
             <button type="submit" class="btn btn-primary btn-lg">Sell Product</button>
             <a href="{% url 'product_list' product.category.pk %}" class="btn btn-secondary btn-lg">Cancel</a>
           </div>

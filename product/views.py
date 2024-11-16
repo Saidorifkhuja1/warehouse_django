@@ -214,12 +214,11 @@ class ProductUpdateView(UpdateView):
 
 
 
-class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class ProductDeleteView(DeleteView):
     model = Product
-    template_name = 'product/product_confirm_delete.html'
-    success_url = reverse_lazy('product_list')
+    template_name = 'product/product_confirm_delete.html'  # Your template file path
+    context_object_name = 'product'
 
-
-    def test_func(self):
-        return self.request.user.is_admin  # Only allow admins
+    def get_success_url(self):
+        return reverse_lazy('product_list', kwargs={'pk': self.object.category.pk})
 
