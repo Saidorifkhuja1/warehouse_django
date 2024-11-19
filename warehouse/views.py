@@ -1,16 +1,20 @@
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import *
-from django.urls import reverse
+
+from account.models import *
 from .forms import *
 from django.shortcuts import get_object_or_404
+from .models import Warehouse
+from django.db.models import Q
+from django.core.exceptions import PermissionDenied
+
 
 class WarehouseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Warehouse
     form_class = WarehouseForm
     template_name = 'warehouse/warehouse_create.html'
-    success_url = reverse_lazy('warehouse_list')
+    success_url = reverse_lazy('homepage')
 
     def test_func(self):
         return self.request.user.is_admin  # Only admins can create warehouses
@@ -37,6 +41,9 @@ class WarehouseListView(LoginRequiredMixin, ListView):
                 # Filter warehouses owned by the creator or assigned to the worker
                 return Warehouse.objects.filter(owner=creator) | Warehouse.objects.filter(connected_users=user)
             return Warehouse.objects.none()
+
+
+
 
 
 class WarehouseDetailView(LoginRequiredMixin, DetailView):
@@ -147,7 +154,7 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         # Redirect to the category list view for the current warehouse
-        return reverse_lazy('category_list', kwargs={'pk': self.get_object().warehouse.pk})
+        return reverse_lazy('category_detail', kwargs={'pk': self.get_object().warehouse.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -156,13 +163,6 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 
-# class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-#     model = Category
-#     template_name = 'warehouse/category_delete.html'
-#     success_url = reverse_lazy('category_list')
-#
-#     def test_func(self):
-#         return self.request.user.is_admin  # Only admins can delete categories
 
 class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Category

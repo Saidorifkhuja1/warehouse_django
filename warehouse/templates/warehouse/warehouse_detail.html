@@ -2,7 +2,96 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+    /* Sidebar Styling */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 250px;
+        background-color: #000000; /* Dark background */
+        padding: 20px;
+        color: #ffffff; /* Light text */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+
+    .sidebar h5 {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #f8f9fa;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .nav-link {
+        font-size: 1rem;
+        color: #ced4da; /* Light gray links */
+        padding: 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: #007bff;
+        color: #ffffff; /* White text on hover */
+    }
+
+    .sidebar .nav-item {
+        margin-bottom: 10px;
+    }
+
+    .sidebar .nav-link.active {
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 270px; /* Leave space for the fixed sidebar */
+        padding: 20px;
+    }
+
+    .main-content h2 {
+        font-size: 2rem;
+        color: #343a40;
+    }
+
+    .main-content p {
+        font-size: 1.1rem;
+        color: #555;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+</style>
+
+<div class="sidebar">
+    <h5>Navigation</h5>
+    <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+            <a href="{% url 'category_list' warehouse.pk %}" class="nav-link">Categories</a>
+        </li>
+        <li class="nav-item mb-2">
+            <a href="{% url 'worker_list' warehouse.pk %}" class="nav-link">Workers</a>
+        </li>
+<!--        <li class="nav-item mb-2">-->
+<!--            <a href="{% url 'warehouse_detail' warehouse.pk %}" class="nav-link">View Details</a>-->
+<!--        </li>-->
+        <li class="nav-item mb-2">
+            <a href="{% url 'warehouse_update' warehouse.pk %}" class="nav-link">Edit</a>
+        </li>
+    </ul>
+</div>
+
+<div class="main-content">
     <h2 class="text-center mb-4">{{ warehouse.name }}</h2>
 
     <div class="row">
@@ -11,21 +100,10 @@
             <p><strong>Phone:</strong> {{ warehouse.phone_number }}</p>
             <p><strong>Description:</strong> {{ warehouse.description }}</p>
         </div>
-        <div class="col-md-6">
-            <!-- You can add an image or other content about the warehouse here, if available -->
-            <!-- <img src="{{ warehouse.image.url }}" class="img-fluid" alt="{{ warehouse.name }}"> -->
-        </div>
     </div>
 
-    <div class="d-flex justify-content-between mt-4">
-        <!-- Edit and Delete Buttons -->
-        <a href="{% url 'warehouse_update' warehouse.pk %}" class="btn btn-warning btn-lg">Edit</a>
-        <a href="{% url 'warehouse_delete' warehouse.pk %}" class="btn btn-danger btn-lg">Delete</a>
-    </div>
-
-    <!-- Back Button -->
     <div class="text-center mt-3">
-        <a href="{% url 'homepage' %}" class="btn btn-secondary btn-lg">Back to Warehouse List</a>
+        <a href="{% url 'homepage' %}" class="btn btn-secondary btn-lg">Back </a>
     </div>
 </div>
 {% endblock %}

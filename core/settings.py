@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-yy_4bx5rs7_z34fa#8qyp0v-9=142((ujq$pz80cw5vzxr^(wr
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-# CSRF_TRUSTED_ORIGINS = [""]
+# CSRF_TRUSTED_ORIGINS = ["*"]
 ROOT_URLCONF = 'core.urls'
 CORS_ALLOW_ALL_ORIGINS = True
 AUTH_USER_MODEL = "account.User"
@@ -139,3 +139,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CUSTOM_WAREHOUSE_PERMISSIONS = [
+    ('view_own_warehouses', 'Can view warehouses they created'),
+    ('view_connected_warehouses', 'Can view warehouses they are connected to (as non-owner)')
+]

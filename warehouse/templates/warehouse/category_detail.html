@@ -1,7 +1,104 @@
 {% extends 'account/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+    /* Sidebar Styling */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 250px;
+        background-color: #000000; /* Dark background */
+        padding: 20px;
+        color: #ffffff; /* Light text */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+
+    .sidebar h5 {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #f8f9fa;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .nav-link {
+        font-size: 1rem;
+        color: #ced4da; /* Light gray links */
+        padding: 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: #007bff;
+        color: #ffffff; /* White text on hover */
+    }
+
+    .sidebar .nav-item {
+        margin-bottom: 10px;
+    }
+
+    .sidebar .nav-link.active {
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 270px; /* Leave space for the fixed sidebar */
+        padding: 20px;
+    }
+
+    .main-content h2 {
+        font-size: 2rem;
+        color: #343a40;
+    }
+
+    .main-content p {
+        font-size: 1.1rem;
+        color: #555;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .card {
+        margin-top: 20px;
+    }
+
+    .btn-primary {
+        border-radius: 12px;
+        padding: 8px 20px;
+    }
+</style>
+
+<div class="sidebar">
+    <h5>Navigation</h5>
+    <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+            <a href="{% url 'product_list' category.pk %}" class="nav-link">Products</a>
+        </li>
+        <li class="nav-item mb-2">
+            <a href="{% url 'sold_product_list' category.pk %}" class="nav-link">Sold Products</a>
+        </li>
+        <li class="nav-item mb-2">
+            <a href="{% url 'category_update' category.pk %}" class="nav-link">Edit</a>
+        </li>
+
+    </ul>
+</div>
+
+<div class="main-content">
     <h2 class="text-center mb-4">Category Details</h2>
 
     <div class="card">
@@ -15,21 +112,10 @@
     </div>
 
     <div class="text-center mt-4">
-        <a href="{% url 'category_list' pk=category.warehouse.pk %}" class="btn btn-primary">Back to Category List</a>
+        <a href="{% url 'category_list' pk=category.warehouse.pk %}" class="btn btn-primary">Back </a>
     </div>
 </div>
 
-<style>
-    .container {
-        max-width: 600px;
-    }
-    .card {
-        margin-top: 20px;
-    }
-    .btn-primary {
-        border-radius: 12px;
-        padding: 8px 20px;
-    }
-</style>
 {% endblock %}
+
 

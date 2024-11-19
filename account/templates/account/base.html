@@ -7,93 +7,156 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        /* Ensure the body takes up the full height and allows footer to stick at the bottom */
+        /* Ensure the body takes up the full height */
         html, body {
             height: 100%;
             margin: 0;
         }
 
-        /* Flexbox layout for the content */
+        /* Layout adjustments */
         .content-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            padding-top: 56px; /* Reserve space for the fixed header */
+            padding-bottom: 60px; /* Reserve space for the fixed footer */
         }
 
         /* Header section: Fixed to the top */
         header {
             position: fixed;
-            width: 100%;
             top: 0;
             left: 0;
+            width: 100%;
             z-index: 1000;
             background-color: #28a745; /* Bootstrap success color */
-            padding: 0.25rem 0.75rem; /* Even smaller padding */
+            padding: 0.5rem 1rem;
         }
 
-        header .navbar-brand {
-            font-size: 1.1rem; /* Smaller font size for the brand */
+        .header-button {
+            margin-left: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            border-radius: 5px;
         }
 
-        header .nav-link {
-            font-size: 0.9rem; /* Smaller font size for links */
+        .header-button:hover {
+            background-color: #218838;
         }
 
-        /* Main content area: Adjust for the header and footer */
-        main {
-            margin-top: 60px; /* Adjust for smaller header height */
-            margin-bottom: 60px; /* Adjust for smaller footer height */
-            padding-top: 10px;
-            flex: 1;
-            overflow-y: auto; /* Allows scrolling of main content */
-        }
-
-        /* Footer section: Fixed at the bottom */
+        /* Footer section: Fixed to the bottom */
         footer {
             position: fixed;
-            width: 100%;
             bottom: 0;
             left: 0;
+            width: 100%;
             background-color: #343a40; /* Bootstrap dark color */
+            color: white;
             text-align: center;
-            padding: 0.25rem 0.75rem; /* Even smaller padding */
+            padding: 1rem 0;
+            z-index: 1000;
         }
 
-        footer p {
-            font-size: 0.8rem; /* Smaller font size */
+        /* Main content section: Allow scrolling */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
-        /* Adjust link spacing */
-        .navbar .nav-item {
-            margin-right: 12px;
+        /* List style */
+        .warehouse-list {
+            display: none; /* Initially hidden */
+            margin-top: 10px;
+            padding: 0;
+            list-style-type: none;
         }
 
-        /* Adjust padding for main content */
-        .container {
-            padding-top: 15px;
+        .warehouse-list li {
+            background-color: #f8f9fa;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        /* Sidebar Style */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            right: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            transition: right 0.3s ease;
+            z-index: 1001;
+        }
+
+        #sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 10px 0;
+        }
+
+        #sidebar a:hover {
+            background-color: #5a6268;
+        }
+
+        /* Button to toggle sidebar */
+        .account-btn {
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Overlay to detect clicks outside the sidebar */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <div class="content-wrapper">
-        <!-- Header Section -->
-        <header class="bg-success text-white">
-            <div class="container d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <a href="{% url 'homepage' %}" class="navbar-brand font-weight-bold text-white mr-3">Bosh sahifa</a>
-
-                </div>
-                <nav>
-                    <ul class="nav">
-                        <li class="nav-item">
-                            <a href="{% url 'profile_detail' %}" class="nav-link text-white">
-                                <i class="fas fa-user-circle fa-lg"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+    <!-- Header Section -->
+    <header class="bg-success text-white">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <a href="{% url 'homepage' %}" class="navbar-brand font-weight-bold text-white mr-3">Bosh sahifa</a>
             </div>
-        </header>
+            <div class="d-flex align-items-center">
+                <!-- Warehouse List Button -->
+                <button onclick="window.location.href='{% url 'warehouse_create' %}'" class="header-button">Warehouse Create</button>
+                <i class="fas fa-user-circle fa-lg account-btn" onclick="toggleSidebar()"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay to close sidebar when clicked outside -->
+    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar for account options -->
+    <div id="sidebar">
+        <a href="{% url 'profile_detail' %}" >Profile Detail</a>
+        <a href="{% url 'profile_update' pk=user.id %}" >Edit Profile</a>
+        <a href="{% url 'profile_delete' %}" >Delete Profile</a>
+        <a href="{% url 'password_reset' %}" >Reset Password</a>
+
+        <a href="{% url 'logout' %}" >Logout</a>
+    </div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Warehouse Names List -->
+        <div class="container">
+            <ul id="warehouseList" class="warehouse-list"></ul>
+        </div>
 
         <!-- Main Content Section -->
         <main class="py-5">
@@ -101,20 +164,56 @@
                 {% block content %}{% endblock %}
             </div>
         </main>
-
-        <!-- Footer Section -->
-        <footer class="bg-dark text-white">
-            <div class="container text-center">
-                <p>Contact us at: <a href="mailto:info@example.com" class="text-success">info@example.com</a> | Phone: (+998) 971231009</p>
-                <p>&copy; All rights reserved.</p>
-            </div>
-        </footer>
     </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="container">
+            <p>Contact us at: <a href="mailto:info@example.com" class="text-success">info@example.com</a> | Phone: (+998) 971231009</p>
+            <p>&copy; All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Function to toggle the sidebar visibility
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const isVisible = sidebar.style.right === '0px';
+            sidebar.style.right = isVisible ? '-250px' : '0px';
+            overlay.style.display = isVisible ? 'none' : 'block'; // Show overlay when sidebar is visible
+        }
+
+        // Function to close the sidebar
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.style.right = '-250px';
+            overlay.style.display = 'none'; // Hide overlay when sidebar is closed
+        }
+
+        // Function to fetch warehouse names
+        function fetchWarehouseNames() {
+            const warehouseList = document.getElementById('warehouseList');
+            warehouseList.innerHTML = ''; // Clear previous items
+
+            // Replace this fetch URL with the actual endpoint returning warehouse data as JSON
+            fetch('/api/warehouses/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(warehouse => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = warehouse.name; // Assuming 'name' is a field in the response
+                        warehouseList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching warehouses:', error);
+                });
+        }
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-

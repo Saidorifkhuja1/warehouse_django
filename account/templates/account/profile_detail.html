@@ -17,16 +17,15 @@
             <p class="card-text"><strong>Last Name:</strong> {{ user.last_name }}</p>
             <p class="card-text"><strong>Phone Number:</strong> {{ user.phone_number }}</p>
         </div>
-
-        <div class="card-footer text-center">
-            <a href="{% url 'profile_update' pk=user.id %}" class="btn btn-primary mb-2">Edit Profile</a>
-            <a href="{% url 'profile_delete' %}" class="btn btn-danger mb-2">Delete Profile</a>
-            <a href="{% url 'password_reset' %}" class="btn btn-warning mb-2">Reset Password</a>
-            <a href="{% url 'homepage' %}" class="btn btn-secondary">Back to Homepage</a>
-            <!-- Changed the class to btn-danger for red color -->
-            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+        <div class="text-center mt-3">
+            <a href="{% url 'homepage' %}" class="btn btn-secondary">Back </a>
         </div>
-    </div>
+        <br>
+
+
+
+
 </div>
+
 {% endblock %}
 

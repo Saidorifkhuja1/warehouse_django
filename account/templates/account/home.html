@@ -9,88 +9,70 @@
         <h1>Welcome, {{ user.name }}!</h1>
     </div>
 
-    <!-- Warehouses Table Section -->
     <h2 class="text-center mb-4">Omborlar</h2>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover" style="width: 100%; max-width: 1200px; margin: auto;">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Warehouse Name</th>
-                    <th scope="col" class="text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for warehouse in warehouses %}
-                    <tr>
-                        <td style="color: black; font-weight: bold;">
-                            {{ warehouse.name }}
-                        </td>
-                        <td class="text-center">
-                            <a href="{% url 'category_list' warehouse.pk %}" class="btn custom-category-btn btn-sm">Categories</a>
-                            <a href="{% url 'worker_list' warehouse.pk %}" class="btn custom-category-btn btn-sm">Workers</a>
-                            <a href="{% url 'warehouse_detail' warehouse.pk %}" class="btn custom-detail-btn btn-sm">View Details</a>
-                            <a href="{% url 'warehouse_update' warehouse.pk %}" class="btn custom-update-btn btn-sm">Edit</a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center">No warehouses available.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Create Warehouse Button -->
-    <div class="text-center mt-4">
-        <a href="{% url 'warehouse_create' %}" class="btn btn-lg custom-create-btn">Create Warehouse</a>
+    <!-- Grid for Warehouses -->
+    <div class="warehouse-grid">
+        {% for warehouse in warehouses %}
+            <div class="warehouse-card" style="background-color: {{ warehouse.color|default:'#d9f7be' }};">
+                <a href="{% url 'warehouse_detail' warehouse.pk %}" class="warehouse-link">
+                    <span class="warehouse-name">{{ warehouse.name }}</span>
+                </a>
+            </div>
+        {% empty %}
+            <div class="text-center w-100">No warehouses available.</div>
+        {% endfor %}
     </div>
 </div>
 
 <style>
-    /* Style table for a larger look */
-    .table {
-        font-size: 1.1rem;
+    /* Center grid layout from the middle */
+    .warehouse-grid {
+        display: grid;
+        place-items: center;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Style each warehouse card */
+    .warehouse-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+        width: 150px; /* Ensure squares */
+        border-radius: 12px;
+        text-align: center;
+        font-weight: bold;
+        color: #343a40;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Link inside the card (no underline and inherit styles) */
+    .warehouse-link {
+        text-decoration: none; /* Remove underline */
+        color: inherit; /* Use parent color */
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        max-width: 1200px;
-        margin: auto;
+        height: 100%;
     }
 
-    /* Button styles for warehouse actions */
-    .custom-category-btn {
-        background-color: #6C757D;
-        color: white;
-        border-radius: 12px;
+    /* Style warehouse name */
+    .warehouse-name {
+        margin: 0;
+        font-size: 1.2rem;
     }
 
-    .custom-detail-btn {
-        background-color: #17A2B8;
-        color: white;
-        border-radius: 12px;
-    }
-
-    .custom-update-btn {
-        background-color: #FFC107;
-        color: white;
-        border-radius: 12px;
-    }
-
-    .custom-create-btn {
-        background-color: #007BFF;
-        color: white;
-        border-radius: 20px;
-        padding: 10px 20px;
-    }
-
-    /* Adjust container width */
-    .container {
-        max-width: 1200px;
-    }
-
-    /* Add hover effects for buttons */
-    .btn:hover {
-        opacity: 0.9;
+    /* Hover effect for warehouse cards */
+    .warehouse-card:hover {
+        background-color: #dc143c; /* Crimson hover color */
+        transform: scale(1.1); /* Slight zoom effect */
+        cursor: pointer;
     }
 </style>
 {% endblock %}

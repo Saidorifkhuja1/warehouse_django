@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.views.generic import View, CreateView, DetailView, UpdateView, \
-    DeleteView, FormView, TemplateView, ListView
+    DeleteView, FormView,ListView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth import update_session_auth_hash
 from django.urls import reverse_lazy
@@ -8,7 +8,7 @@ from django.contrib import messages
 from .forms import *
 from .models import *
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
 from django.shortcuts import render
@@ -38,7 +38,6 @@ class HomePageView(LoginRequiredMixin, ListView):
 
 
 
-from django.urls import reverse_lazy
 
 class WorkerCreateView(UserPassesTestMixin, CreateView):
     model = User
@@ -115,7 +114,7 @@ class UpdateProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     form_class = UserUpdateForm
     template_name = 'account/profile_update.html'
-    success_url = reverse_lazy('profile_detail')  # Redirect to the profile detail page after update
+    success_url = reverse_lazy('homepage')  # Redirect to the profile detail page after update
 
     def test_func(self):
         return self.request.user.is_admin  # Only allow access if the user is an admin
@@ -159,7 +158,7 @@ class DeleteProfileView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class PasswordResetView(LoginRequiredMixin, FormView):
     template_name = 'account/password_reset.html'
     form_class = PasswordResetForm  # A form with old_password and new_password fields
-    success_url = reverse_lazy('profile_detail')
+    success_url = reverse_lazy('homepage')
 
     def test_func(self):
         # Only allow access if the user is an admin
@@ -176,7 +175,7 @@ class PasswordResetView(LoginRequiredMixin, FormView):
         user.set_password(new_password)
         user.save()
         update_session_auth_hash(self.request, user)  # Keep user logged in after password change
-        messages.success(self.request, "Password changed successfully!")
+        messages.success(self.request, "")
         return super().form_valid(form)
 
 

@@ -3,92 +3,109 @@
 
 {% block content %}
 <div class="container mt-5">
+
+    <!-- Category Heading Section -->
     <h2 class="text-center mb-4">Categories</h2>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover" style="width: 100%; max-width: 1200px; margin: auto;">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Category Name</th>
-                    <th scope="col" class="text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                    <tr>
-                        <td style="color: black; font-weight: bold;">
-                            {{ category.name }}
-                        </td>
-                        <td class="text-center">
-                            <a href="{% url 'product_list' category.pk %}" class="btn custom-product-btn btn-sm">Products</a>
-                            <a href="{% url 'sold_product_list' category.pk %}" class="btn custom-product-btn btn-sm">Sold Products</a>
-                            <a href="{% url 'category_detail' category.pk %}" class="btn custom-detail-btn btn-sm">Details</a>
-                            <a href="{% url 'category_update' category.pk %}" class="btn custom-update-btn btn-sm">Edit</a>
-                            <a href="{% url 'category_delete' category.pk %}" class="btn custom-delete-btn btn-sm">Delete</a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center">No categories available.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+
+    <!-- Categories Grid -->
+    <div class="category-grid">
+        {% for category in categories %}
+            <div class="category-card">
+                <a href="{% url 'category_detail' category.pk %}" class="category-link">
+                    <span class="category-name">{{ category.name }}</span>
+                </a>
+            </div>
+        {% empty %}
+            <div class="text-center w-100">No categories available.</div>
+        {% endfor %}
     </div>
 
+    <!-- Action Buttons -->
     <div class="text-center mt-4">
         <a href="{% url 'category_create' pk=warehouse.pk %}" class="btn btn-lg custom-create-btn">Create New Category</a>
-        <a href="{% url 'homepage' %}" class="btn btn-lg custom-create-btn">Chiqish </a>
+        <a href="{% url 'warehouse_detail' pk=warehouse.pk %}" class="btn btn-lg custom-create-btn">Back </a>
     </div>
+
 </div>
 
 <style>
-    /* Style table for a larger look */
-    .table {
-        font-size: 1.1rem;
+    /* Grid Layout for Categories */
+    .category-grid {
+        display: grid;
+        place-items: center;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Styling for Each Category Card */
+    .category-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+        width: 150px; /* Equal square size */
+        border-radius: 12px;
+        background-color: #6495ed; /* Background color */
+        text-align: center;
+        font-weight: bold;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        overflow: hidden; /* Hide overflow */
+        padding: 10px; /* Padding to give some space inside the square */
+    }
+
+    /* Link Inside the Card */
+    .category-link {
+        text-decoration: none; /* Remove underline */
+        color: black; /* Use parent color */
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        max-width: 1200px;
-        margin: auto;
+        height: 100%;
     }
 
-    /* Button styles for category actions */
-    .custom-product-btn {
-        background-color: #6C757D;
-        color: white;
-        border-radius: 12px;
+    /* Category Name Styling */
+    .category-name {
+        margin: 0;
+        font-size: 1.2rem;
+        text-align: center;
+        white-space: nowrap; /* Prevent text from wrapping */
+        overflow: hidden; /* Hide overflowed text */
+        text-overflow: ellipsis; /* Show ellipsis for overflowing text */
     }
 
-    .custom-detail-btn {
-        background-color: #17A2B8;
-        color: white;
-        border-radius: 12px;
+    /* Hover Effect for Category Cards */
+    .category-card:hover {
+        background-color: #4169e1; /* Darker blue when hovered */
+        transform: scale(1.1); /* Slight zoom effect */
+        cursor: pointer;
     }
 
-    .custom-update-btn {
-        background-color: #FFC107;
-        color: white;
-        border-radius: 12px;
-    }
-
-    .custom-delete-btn {
-        background-color: #DC3545;
-        color: white;
-        border-radius: 12px;
-    }
-
+    /* Button Styling */
     .custom-create-btn {
         background-color: #007BFF;
-        color: white;
+        color: black;
         border-radius: 20px;
         padding: 10px 20px;
+        font-size: 1.2rem;
     }
 
-    /* Adjust container width */
+    .custom-create-btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Container Styling */
     .container {
         max-width: 1200px;
     }
 
-    /* Add hover effects for buttons */
+    /* Hover Effects for Buttons */
     .btn:hover {
         opacity: 0.9;
     }

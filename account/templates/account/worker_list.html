@@ -61,7 +61,8 @@
     {% endif %}
 
     <div class="text-center mt-4">
-        <a href="{% url 'homepage' %}" class="btn btn-primary">Back to Homepage</a>
+        <a href="{% url 'warehouse_detail' pk=warehouse.pk %}" class="btn btn-primary">Back</a>
+
         <a href="{% url 'worker_create' %}" class="btn btn-primary">Create Worker</a>
     </div>
 </div>
