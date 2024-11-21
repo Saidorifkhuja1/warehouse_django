@@ -72,7 +72,8 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
         context['category'] = self.object.category
         return context
 
-from django.core.exceptions import ValidationError
+
+
 
 class SellProductView(UpdateView):
     model = Product
@@ -84,6 +85,10 @@ class SellProductView(UpdateView):
         # Fetch the product object that is being updated
         product = get_object_or_404(Product, pk=self.kwargs['pk'])
         return product
+
+    def test_func(self):
+        # Allow access for both the product creator and admins
+        return self.request.user.is_admin or self.request.user == self.get_object().owner
 
     def form_valid(self, form):
         # Retrieve the product object and the amount entered in the form
@@ -141,16 +146,17 @@ class SellProductView(UpdateView):
         form = super().get_form(form_class)
         user = self.request.user
 
+        # Admins can see all categories related to their warehouses and those of their creators
         if user.is_admin:
-            form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user)
-            if user.created_by:
-                form.fields['category'].queryset |= Category.objects.filter(
-                    warehouse__owner__in=user.created_by.get_admins()
-                )
+            form.fields['category'].queryset = Category.objects.all()
         else:
+            # Non-admin users only see categories from their own warehouses or those of their creator
             form.fields['category'].queryset = Category.objects.filter(warehouse__owner=user.created_by)
 
         return form
+
+
+
 
 
 class SoldProductListView(LoginRequiredMixin, ListView):
@@ -171,12 +177,15 @@ class SoldProductListView(LoginRequiredMixin, ListView):
         return context
 
 
-
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(UserPassesTestMixin, UpdateView):
     model = Product
-    fields = ['name', 'cost', 'amount', 'description', 'note', 'status', 'category']
+    form_class = ProductForm
     template_name = 'product/product_update.html'
     context_object_name = 'product'
+
+    def test_func(self):
+        # Allow only admin users to access this view
+        return self.request.user.is_admin
 
     def get_object(self, queryset=None):
         # Fetch the specific product being updated based on the primary key (pk)
@@ -209,6 +218,54 @@ class ProductUpdateView(UpdateView):
     def get_success_url(self):
         # Redirect to the product list after a successful update
         return reverse('product_list', kwargs={'pk': self.object.category.pk})
+
+    def form_valid(self, form):
+        # Ensure the product is updated successfully
+        self.object = form.save()
+        return redirect(self.get_success_url())
+
+
+# class ProductUpdateView(UpdateView):
+#     model = Product
+#     form_class = ProductForm
+#     template_name = 'product/product_update.html'
+#     context_object_name = 'product'
+#
+#     def test_func(self):
+#         return self.request.user.is_admin
+#
+#
+#     def get_object(self, queryset=None):
+#         # Fetch the specific product being updated based on the primary key (pk)
+#         return get_object_or_404(Product, pk=self.kwargs['pk'])
+#
+#     def get_form(self, *args, **kwargs):
+#         form = super().get_form(*args, **kwargs)
+#
+#         # Get the current user
+#         user = self.request.user
+#
+#         # Find warehouses created by the user or the user's creator
+#         user_warehouses = Warehouse.objects.filter(
+#             owner__in=[user, user.created_by]
+#         )
+#
+#         # Filter categories based on these warehouses
+#         form.fields['category'].queryset = Category.objects.filter(
+#             warehouse__in=user_warehouses
+#         )
+#
+#         return form
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         # Pass the category associated with the current product
+#         context['category'] = self.object.category
+#         return context
+#
+#     def get_success_url(self):
+#         # Redirect to the product list after a successful update
+#         return reverse('product_list', kwargs={'pk': self.object.category.pk})
 
 
 

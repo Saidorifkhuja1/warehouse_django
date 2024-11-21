@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
   <div class="container mt-5">
+    <!-- Title with improved styling -->
     <h2 class="text-center mb-4 text-primary">Sell Product: <strong>{{ product.name }}</strong></h2>
 
     {% if messages %}
@@ -14,19 +15,26 @@
       </div>
     {% endif %}
 
-    <div class="card shadow-sm">
+    <!-- Card with shadow and padding -->
+    <div class="card shadow-lg border-light rounded">
       <div class="card-body">
+        <!-- Informational Message -->
+        <div class="alert alert-warning mb-4">
+          <h5 class="mb-0">Until updating the status of the product, you cannot sell it.</h5>
+        </div>
+
         <form method="post">
           {% csrf_token %}
 
-          <h4>Until updating status of product you can not sell it </h4>
-          {{ form.as_p }}  <!-- Renders all fields in the form -->
+          <!-- Render form fields with Bootstrap classes -->
+          <div class="mb-4">
+            {{ form.as_p }}
+          </div>
 
-          <!-- Submit Button -->
-          <div class="d-flex justify-content-between">
-
-            <button type="submit" class="btn btn-primary btn-lg">Sell Product</button>
-            <a href="{% url 'product_list' product.category.pk %}" class="btn btn-secondary btn-lg">Cancel</a>
+          <!-- Submit and Cancel buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="submit" class="btn btn-primary btn-lg w-48">Sell Product</button>
+            <a href="{% url 'product_list' product.category.pk %}" class="btn btn-outline-secondary btn-lg w-48">Cancel</a>
           </div>
         </form>
       </div>
@@ -37,31 +45,34 @@
 
 {% block extra_css %}
   <style>
-    /* Container and title styling */
+    /* General container styling */
     .container {
       max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
 
+    /* Heading styling */
     h2 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: #343a40;
       text-align: center;
+      font-weight: 600;
     }
 
-    .alert-info {
+    .alert-info, .alert-warning {
       margin-bottom: 20px;
     }
 
     /* Card styling */
     .card {
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      background-color: #f8f9fa;
     }
 
     .card-body {
-      padding: 30px;
+      padding: 40px;
     }
 
     /* Form Fields */
@@ -72,22 +83,24 @@
     }
 
     .form-control {
-      border-radius: 5px;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      padding: 10px;
+      padding: 12px;
       font-size: 1rem;
       width: 100%;
+      background-color: #fff;
     }
 
-    .form-group {
-      margin-bottom: 20px;
+    .form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
     }
 
     /* Buttons */
     .btn {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 5px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      border-radius: 8px;
     }
 
     .btn-primary {
@@ -99,13 +112,15 @@
       background-color: #0056b3;
     }
 
-    .btn-secondary {
-      background-color: #6c757d;
-      border: none;
+    .btn-outline-secondary {
+      background-color: transparent;
+      border: 2px solid #6c757d;
+      color: #6c757d;
     }
 
-    .btn-secondary:hover {
-      background-color: #5a6268;
+    .btn-outline-secondary:hover {
+      background-color: #6c757d;
+      color: #fff;
     }
 
     .btn-lg {
@@ -116,6 +131,18 @@
       display: flex;
       justify-content: space-between;
     }
+
+    .w-48 {
+      width: 48%;
+    }
+
+    /* Alert message styling */
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 1.1rem;
+    }
   </style>
 {% endblock %}
-

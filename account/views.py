@@ -15,25 +15,33 @@ from django.shortcuts import render
 from .models import Warehouse
 
 
-
-
-class HomePageView(LoginRequiredMixin, ListView):
+class HomePageView(ListView):
     model = Warehouse
-    template_name = 'account/home.html'
+    template_name = 'warehouse_list.html'
     context_object_name = 'warehouses'
 
     def get_queryset(self):
         user = self.request.user
+
+        # Admins can see:
+        # 1. Warehouses they own (owner=user)
+        # 2. Warehouses created by other admins connected to them (via created_by)
+        # 3. Warehouses they are directly connected to via 'warehouse' ForeignKey
+
         if user.is_admin:
-            # Admins should see only warehouses they created
-            return Warehouse.objects.filter(owner=user)
-        else:
-            # Workers should see warehouses connected to them and those created by their creator
-            creator = user.owner if hasattr(user, 'owner') else None
-            if creator:
-                # Filter warehouses owned by the creator or assigned to the worker
-                return Warehouse.objects.filter(owner=creator) | Warehouse.objects.filter(connected_users=user)
-            return Warehouse.objects.none()
+            # Warehouses owned by the admin
+            warehouses = Warehouse.objects.filter(owner=user)
+
+            # Warehouses created by admins connected to this admin
+            connected_admins = User.objects.filter(created_by=user)
+            warehouses |= Warehouse.objects.filter(owner__in=connected_admins)
+
+            # Warehouses where the user is directly connected via the 'warehouse' ForeignKey
+            warehouses |= Warehouse.objects.filter(id=user.warehouse.id) if user.warehouse else Warehouse.objects.none()
+
+            return warehouses
+
+
 
 
 
@@ -213,10 +221,6 @@ class WorkerCreateView(UserPassesTestMixin, CreateView):
 
 
 
-
-
-
-
 class WorkerListView(ListView):
     model = User
     template_name = 'account/worker_list.html'
@@ -227,8 +231,13 @@ class WorkerListView(ListView):
         warehouse_id = self.kwargs.get('warehouse_id')
         warehouse = get_object_or_404(Warehouse, pk=warehouse_id)
 
-        # Filter users who are workers (is_admin=False), assigned to the current warehouse
-        return User.objects.filter(warehouse=warehouse, is_admin=False, created_by=self.request.user)
+        # Allow any admin to see the worker list
+        if self.request.user.is_admin:
+            # If the user is an admin, they can see all workers for the warehouse
+            return User.objects.filter(warehouse=warehouse)
+        else:
+            # If the user is not an admin, they can only see workers they created
+            return User.objects.filter(warehouse=warehouse, created_by=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -239,27 +248,21 @@ class WorkerListView(ListView):
 
 
 
-
-
-
-
-
-
-
-
 class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     fields = ['name', 'last_name', 'phone_number', 'warehouse', 'photo', 'is_active', 'is_admin']
     template_name = 'account/worker_update.html'
 
-
     def get_object(self, queryset=None):
+        # Ensure the worker being updated is the one the current user has created
         worker = get_object_or_404(User, pk=self.kwargs['pk'], created_by=self.request.user)
         return worker
 
-    def form_valid(self, form):
-        # Ensure the creator can set is_admin to True if desired
-        return super().form_valid(form)
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Limit the queryset of the warehouse field to those created by the current admin
+        form.fields['warehouse'].queryset = Warehouse.objects.filter(owner=self.request.user)
+        return form
 
     def get_success_url(self):
         # Dynamically generate the success URL with warehouse_id
@@ -270,6 +273,41 @@ class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Check if the current user is an admin and created this worker
         worker = self.get_object()
         return self.request.user.is_admin and worker.created_by == self.request.user
+
+
+
+
+
+
+
+
+
+
+
+
+# class WorkerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     model = User
+#     fields = ['name', 'last_name', 'phone_number', 'warehouse', 'photo', 'is_active', 'is_admin']
+#     template_name = 'account/worker_update.html'
+#
+#
+#     def get_object(self, queryset=None):
+#         worker = get_object_or_404(User, pk=self.kwargs['pk'], created_by=self.request.user)
+#         return worker
+#
+#     def form_valid(self, form):
+#         # Ensure the creator can set is_admin to True if desired
+#         return super().form_valid(form)
+#
+#     def get_success_url(self):
+#         # Dynamically generate the success URL with warehouse_id
+#         worker = self.get_object()
+#         return reverse_lazy('worker_list', kwargs={'warehouse_id': worker.warehouse.pk})
+#
+#     def test_func(self):
+#         # Check if the current user is an admin and created this worker
+#         worker = self.get_object()
+#         return self.request.user.is_admin and worker.created_by == self.request.user
 
 
 class WorkerDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

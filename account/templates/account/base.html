@@ -126,17 +126,19 @@
 <body>
     <!-- Header Section -->
     <header class="bg-success text-white">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-                <a href="{% url 'homepage' %}" class="navbar-brand font-weight-bold text-white mr-3">Bosh sahifa</a>
-            </div>
-            <div class="d-flex align-items-center">
-                <!-- Warehouse List Button -->
-                <button onclick="window.location.href='{% url 'warehouse_create' %}'" class="header-button">Warehouse Create</button>
-                <i class="fas fa-user-circle fa-lg account-btn" onclick="toggleSidebar()"></i>
-            </div>
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'homepage' %}" class="navbar-brand font-weight-bold text-white mr-3">Bosh sahifa</a>
         </div>
-    </header>
+        <div class="d-flex align-items-center">
+            <!-- Warehouse List Button -->
+            <button onclick="window.location.href='{% url 'warehouse_create' %}'" class="header-button mr-3">Warehouse Create</button>
+
+            <!-- Add margin-right to create space between button and account icon -->
+            <i class="fas fa-user-circle fa-lg account-btn" onclick="toggleSidebar()"></i>
+        </div>
+    </div>
+</header>
 
     <!-- Overlay to close sidebar when clicked outside -->
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>

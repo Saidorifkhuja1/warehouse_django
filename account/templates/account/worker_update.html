@@ -1,20 +1,32 @@
 {% extends 'account/base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Update Workers Profile</h1>
+    <h1 class="text-center mb-5 text-primary font-weight-bold">Update Worker Profile</h1>
 
-    <form method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
-        {% csrf_token %}
-        <div class="form-group">
-            {{ form.as_p }}
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="card shadow-lg rounded-3">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
+                        {% csrf_token %}
+
+                        <!-- Form Fields -->
+                        <div class="form-group mb-4">
+                            <label for="worker_name" class="form-label font-weight-bold text-dark">Worker Name</label>
+                            {{ form.as_p }}
+                        </div>
+
+                        <!-- Save Changes Button -->
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill w-100 px-4 py-2 transition-all ease-in-out hover:scale-105 mt-3">Save Changes</button>
+                    </form>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-success btn-block">Save Changes</button>
-    </form>
-
+    <!-- Back to Worker List Button -->
     <div class="mt-4 text-center">
-        <a href="{% url 'worker_list' warehouse_id=object.warehouse.pk %}" class="btn btn-primary">Back to Worker List</a>
+        <a href="{% url 'worker_list' warehouse_id=object.warehouse.pk %}" class="btn btn-outline-primary btn-lg rounded-pill px-4 py-2 hover:bg-primary hover:text-white transition-all ease-in-out">Back to Worker List</a>
     </div>
 </div>
 {% endblock %}
-

@@ -1,10 +1,13 @@
 from django import forms
 from .models import Warehouse, Category
+from django.db.models import Q
+
 
 class WarehouseForm(forms.ModelForm):
     class Meta:
         model = Warehouse
         fields = ['name', 'address', 'phone_number', 'description']
+
 
 
 class CategoryForm(forms.ModelForm):
@@ -22,3 +25,4 @@ class CategoryForm(forms.ModelForm):
         elif user:
             # Non-admin users can see warehouses created by their admin
             self.fields['warehouse'].queryset = Warehouse.objects.filter(owner=user.owner)
+

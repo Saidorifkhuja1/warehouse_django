@@ -1,7 +1,7 @@
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-
+from django.http import Http404
 from account.models import *
 from .forms import *
 from django.shortcuts import get_object_or_404
@@ -24,24 +24,29 @@ class WarehouseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super().form_valid(form)
 
 
-class WarehouseListView(LoginRequiredMixin, ListView):
+
+
+class WarehouseListView(ListView):
     model = Warehouse
-    template_name = 'warehouse/warehouse_list.html'
+    template_name = 'warehouse_list.html'
     context_object_name = 'warehouses'
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_admin:
-            # Admins should see only warehouses they created
-            return Warehouse.objects.filter(owner=user)
-        else:
-            # Workers should see warehouses connected to them and those created by their creator
-            creator = user.owner if hasattr(user, 'owner') else None
-            if creator:
-                # Filter warehouses owned by the creator or assigned to the worker
-                return Warehouse.objects.filter(owner=creator) | Warehouse.objects.filter(connected_users=user)
-            return Warehouse.objects.none()
 
+
+        if user.is_admin:
+            # Warehouses owned by the admin
+            warehouses = Warehouse.objects.filter(owner=user)
+
+            # Warehouses created by admins connected to this admin
+            connected_admins = User.objects.filter(created_by=user)
+            warehouses |= Warehouse.objects.filter(owner__in=connected_admins)
+
+            # Warehouses where the user is directly connected via the 'warehouse' ForeignKey
+            warehouses |= Warehouse.objects.filter(id=user.warehouse.id) if user.warehouse else Warehouse.objects.none()
+
+            return warehouses
 
 
 
@@ -51,6 +56,28 @@ class WarehouseDetailView(LoginRequiredMixin, DetailView):
     template_name = 'warehouse/warehouse_detail.html'
     context_object_name = 'warehouse'
 
+    def get_object(self, queryset=None):
+        # Get the warehouse object
+        warehouse = super().get_object(queryset)
+
+        user = self.request.user
+        if (
+            warehouse.owner == user or
+            (user.is_admin and (
+                user.warehouse == warehouse or
+                warehouse.owner == user.created_by
+            ))
+        ):
+            return warehouse
+
+        # Raise a 404 error if the user does not have access
+        raise Http404("You do not have permission to view this warehouse.")
+
+
+
+
+
+
 
 class WarehouseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Warehouse
@@ -59,7 +86,19 @@ class WarehouseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('warehouse_list')
 
     def test_func(self):
-        return self.request.user == self.get_object().owner  # Only the owner can update the warehouse
+        warehouse = self.get_object()
+        user = self.request.user
+        is_owner = user == warehouse.owner
+        is_connected_admin = warehouse.owner.creator_user.filter(id=user.id).exists()
+        is_directly_connected = user.warehouse == warehouse
+
+        return is_owner or is_connected_admin or is_directly_connected
+
+
+
+
+
+
 
 
 class WarehouseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -68,10 +107,15 @@ class WarehouseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('warehouse_list')
 
     def test_func(self):
-        return self.request.user == self.get_object().owner  # Only the owner can delete the warehouse
+        warehouse = self.get_object()
+        user = self.request.user
 
 
+        is_owner = user == warehouse.owner
+        is_connected_admin = warehouse.owner.creator_user.filter(id=user.id).exists()
+        is_directly_connected = user.warehouse == warehouse
 
+        return is_owner or is_connected_admin or is_directly_connected
 
 
 class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -99,7 +143,6 @@ class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 
-
 class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'warehouse/category_list.html'
@@ -111,16 +154,17 @@ class CategoryListView(LoginRequiredMixin, ListView):
         warehouse = get_object_or_404(Warehouse, pk=warehouse_id)
 
         if user.is_admin:
-            # Admin sees categories for the specific warehouse they own
-            return Category.objects.filter(warehouse=warehouse, warehouse__owner=user)
+            # Admins can see all categories for the specified warehouse, regardless of who owns it
+            return Category.objects.filter(warehouse=warehouse)
         else:
-            # Workers or other users see categories linked to their admin’s warehouses
+            # Workers or other users can only see categories linked to their admin’s warehouses
             return Category.objects.filter(warehouse=warehouse, warehouse__owner=user.owner) if hasattr(user, 'owner') else Category.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['warehouse'] = get_object_or_404(Warehouse, pk=self.kwargs['pk'])
         return context
+
 
 
 
@@ -142,10 +186,7 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'warehouse/category_update.html'
 
     def test_func(self):
-        user = self.request.user
-        category = self.get_object()
-        # Only admins can update categories, and they must own the warehouse
-        return user.is_admin and category.warehouse.owner == user
+        return self.request.user.is_admin
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -160,6 +201,8 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['warehouse'] = self.get_object().warehouse  # Pass warehouse to template
         return context
+
+
 
 
 
